@@ -23,7 +23,6 @@ const userSchema = new mongoose.Schema(
     userType: {
       type: String,
       enum: ["google", "regular", "hybrid"],
-      default:"regular",
       required: true,
     },
   },

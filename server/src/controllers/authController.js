@@ -29,6 +29,7 @@ export const UserRegister = async (req, res, next) => {
       email,
       mobileNumber,
       password: hashedPassword,
+      userType: "regular",
     });
 
     res.status(201).json({ message: "Registration successful" });
@@ -51,6 +52,13 @@ export const UserLogin = async (req, res, next) => {
     const existingUser = await User.findOne({ email });
     if (!existingUser) {
       const error = new Error("Email not registered");
+      error.statusCode = 400;
+      return next(error);
+    }
+
+    const isGoogleUser = existingUser.userType === "google";
+    if (isGoogleUser) {
+      const error = new Error("Please log in with Google");
       error.statusCode = 400;
       return next(error);
     }
@@ -78,30 +86,51 @@ export const UserLogin = async (req, res, next) => {
 // ================= GOOGLE LOGIN =================
 export const GoogleUserLogin = async (req, res, next) => {
   try {
-    const userData = req.user;
+    const {name, email, id, imageUrl} = req.body;
 
-    if (!userData) {
-      const error = new Error("Google authentication failed");
-      error.statusCode = 401;
-      return next(error);
+    if (!imageUrl) {
+      //use Defualt Photo Code here
+      //using placehold.co
     }
 
-    let user = await User.findOne({ email: userData.email });
+  
+    let existingUser = await User.findOne({ email });
+    const salt = await bcrypt.genSalt(10);
 
-    if (!user) {
-      user = await User.create({
-        fullName: userData.name,
-        email: userData.email,
-        mobileNumber: "",
-        password: "",
-        isGoogleUser: true,
+    if(existingUser && existingUser.userType){
+      if(existingUser.userType === "regular"){
+        console.log("pink");
+        existingUser.userType = "hybrid";
+        existingUser.googleId = bcrypt.hash(id,salt);
+        await existingUser.save();
+      }
+      else{
+        console.log("green");
+        const isVerified = await bcrypt.compare(id,existingUser.googleId);
+        if(!isVerified){
+          const error = new Error ("User not Verified")
+          error.statusCode = 400;
+          return next(error);
+        } 
+      }
+    }else{
+      console.log("orange");
+      const hashGoogleID = await bcrypt.hash(id,salt);
+
+      const newUser = await User.create({
+        fullName:name,
+        email,
+        googleId:hashGoogleID,
+        userType:"google",
       });
+      existingUser = newUser;
     }
 
+    //generate login token if required 
     res.status(200).json({
-      message: "Google Login successful",
-      data: user,
-    });
+      message:"Login Successful",
+      data:existingUser,
+    }); 
   } catch (error) {
     next(error);
   }

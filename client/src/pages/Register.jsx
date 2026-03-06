@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import toast from "react-hot-toast";
-import api from "../config/api"
+import api from "../config/api";
 
 const Register = () => {
   const [formData, setFormData] = useState({
@@ -41,7 +41,7 @@ const Register = () => {
 
     if (
       !/^[\w\.]+@(gmail|outlook|ricr|yahoo)\.(com|in|co.in)$/.test(
-        formData.email,
+        formData.email
       )
     ) {
       Error.email = "Use proper email format";
@@ -116,38 +116,26 @@ const Register = () => {
                 )}
               </div>
 
-              <div>
-                <input
-                  type="email"
-                  name="email"
-                  placeholder="Email Address"
-                  value={formData.email}
-                  onChange={handleChange}
-                  disabled={isLoading}
-                  className="input input-bordered w-full"
-                />
-                {validationError.email && (
-                  <p className="text-error text-sm">{validationError.email}</p>
-                )}
-              </div>
+              <input
+                type="email"
+                name="email"
+                placeholder="Email Address"
+                value={formData.email}
+                onChange={handleChange}
+                disabled={isLoading}
+                className="input input-bordered w-full"
+              />
 
-              <div>
-                <input
-                  type="tel"
-                  name="mobileNumber"
-                  placeholder="Mobile Number"
-                  maxLength="10"
-                  value={formData.mobileNumber}
-                  onChange={handleChange}
-                  disabled={isLoading}
-                  className="input input-bordered w-full"
-                />
-                {validationError.mobileNumber && (
-                  <p className="text-error text-sm">
-                    {validationError.mobileNumber}
-                  </p>
-                )}
-              </div>
+              <input
+                type="tel"
+                name="mobileNumber"
+                placeholder="Mobile Number"
+                maxLength="10"
+                value={formData.mobileNumber}
+                onChange={handleChange}
+                disabled={isLoading}
+                className="input input-bordered w-full"
+              />
 
               <input
                 type="password"
